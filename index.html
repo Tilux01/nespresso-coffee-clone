@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nespresso Clone</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Playfair+Display:ital@1&display=swap');
+
+        :root {
+            --bg-gradient-start: #153b3d;
+            --bg-gradient-end: #081d1f;
+            --text-main: #ffffff;
+            --text-muted: #547072;
+            --text-subtle: #8fa4a6;
+            --accent-teal: #2c5963;
+            --control-bg: rgba(255, 255, 255, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: radial-gradient(circle at center, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- Header --- */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 30px 50px;
+        }
+
+        .header-left, .header-right {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-center {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 4px;
+            font-family: 'Playfair Display', serif; /* Or a serif close to Nespresso */
+            text-transform: uppercase;
+        }
+
+        /* --- Navigation --- */
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 10px;
+            position: relative;
+            z-index: 10;
+        }
+
+        nav a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+            transition: color 0.3s;
+            position: relative;
+            padding-bottom: 8px;
+        }
+
+        nav a:hover, nav a.active {
+            color: var(--text-main);
+        }
+
+        nav a.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            background-color: var(--text-main);
+            border-radius: 50%;
+        }
+
+        /* --- Main Content --- */
+        main {
+            flex: 1;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -60%);
+            font-size: 220px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.05);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* --- Carousel --- */
+        .carousel {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 350px;
+        }
+
+        .pod-container {
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.5s ease;
+        }
+
+        /* CSS Nespresso Pod Representation */
+        .pod {
+            width: 120px;
+            height: 140px;
+            border-radius: 20px 20px 60px 60px;
+            background: linear-gradient(135deg, #444 0%, #111 100%);
+            position: relative;
+            transform: rotate(-25deg);
+            box-shadow: -15px 25px 30px rgba(0,0,0,0.5), inset 5px 5px 15px rgba(255,255,255,0.2);
+            display: flex;
+            justify-content: center;
+        }
+
+        .pod::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            width: 130px;
+            height: 20px;
+            border-radius: 50%;
+            background: inherit;
+            filter: brightness(1.2);
+            box-shadow: 0 5px 5px rgba(0,0,0,0.3);
+        }
+
+        /* Pod Colors */
+        .pod.purple { background: linear-gradient(135deg, #7a3a7a 0%, #300f30 100%); }
+        .pod.teal { background: linear-gradient(135deg, #428d9c 0%, #173238 100%); }
+        .pod.brown { background: linear-gradient(135deg, #7a5446 0%, #301f19 100%); }
+        .pod.black { background: linear-gradient(135deg, #333333 0%, #0a0a0a 100%); }
+
+        /* Carousel Positions */
+        .pos-1 { transform: translateX(-350px) scale(0.6); opacity: 0.4; z-index: 1; }
+        .pos-2 { transform: translateX(0) scale(1); opacity: 1; z-index: 3; }
+        .pos-3 { transform: translateX(300px) scale(0.7); opacity: 0.4; z-index: 2; }
+        .pos-4 { transform: translateX(500px) scale(0.5); opacity: 0.2; z-index: 1; }
+
+        .info-badge {
+            position: absolute;
+            top: 20px;
+            right: 0px;
+            width: 24px;
+            height: 24px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+        }
+
+        /* --- Product Details --- */
+        .details {
+            position: relative;
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+            gap: 8px;
+        }
+
+        .intensity {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: 12px;
+            color: #d2d2d2;
+        }
+
+        .cup-sizes {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: 10px;
+            color: var(--text-subtle);
+        }
+
+        .product-title {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin: 10px 0;
+        }
+
+        .price {
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        /* --- Controls --- */
+        .actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .stepper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--control-bg);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 30px;
+            padding: 10px 20px;
+            width: 140px;
+        }
+
+        .stepper span {
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .stepper button {
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .add-cart {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255,255,255,0.15);
+            border: none;
+            border-radius: 30px;
+            padding: 12px 25px;
+            color: var(--text-main);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .add-cart:hover {
+            background: rgba(255,255,255,0.25);
+        }
+
+        /* --- Side Utilities --- */
+        .socials {
+            position: fixed;
+            bottom: 60px;
+            right: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            z-index: 10;
+        }
+
+        .socials span {
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            font-size: 10px;
+            color: var(--text-subtle);
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .socials svg {
+            width: 14px;
+            height: 14px;
+            fill: var(--text-subtle);
+            cursor: pointer;
+            transition: fill 0.3s;
+        }
+        
+        .socials svg:hover {
+            fill: var(--text-main);
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-left">
+            FILTER 
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </div>
+        <div class="header-center">
+            NESPRESSO ®
+        </div>
+        <div class="header-right">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+            CART (3)
+        </div>
+    </header>
+
+    <nav>
+        <a href="#">MY FAVOURITES</a>
+        <a href="#" class="active">INTENSO</a>
+        <a href="#">ESPRESSO</a>
+        <a href="#">PURE ORIGIN</a>
+        <a href="#">LUNGO</a>
+        <a href="#">DECAFFEINATO</a>
+        <a href="#">VARIATION</a>
+    </nav>
+
+    <main>
+        <div class="watermark">11</div>
+
+        <div class="carousel">
+            <!-- Left Pod (Purple) -->
+            <div class="pod-container pos-1">
+                <div class="pod purple"></div>
+            </div>
+
+            <!-- Center Pod (Teal) -->
+            <div class="pod-container pos-2">
+                <div class="pod teal">
+                    <div class="info-badge">+</div>
+                </div>
+            </div>
+
+            <!-- Right Pod 1 (Brown) -->
+            <div class="pod-container pos-3">
+                <div class="pod brown"></div>
+            </div>
+
+            <!-- Right Pod 2 (Black) -->
+            <div class="pod-container pos-4">
+                <div class="pod black"></div>
+            </div>
+        </div>
+
+        <div class="details">
+            <div class="intensity">Intensity - 11</div>
+            <div class="cup-sizes">25ml, 40ml</div>
+            <h1 class="product-title">DHARKAN</h1>
+            <div class="price">£3.30</div>
+
+            <div class="actions">
+                <div class="stepper">
+                    <button>–</button>
+                    <span>1 Sleeve</span>
+                    <button>+</button>
+                </div>
+                <button class="add-cart">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                    ADD TO CART
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <div class="socials">
+        <span>SHARE</span>
+        <svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+        <svg viewBox="0 0 24 24"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
+    </div>
+
+    <script>
+        // Quantity Stepper
+        const stepperSpan = document.querySelector('.stepper span');
+        const minusBtn = document.querySelector('.stepper button:first-child');
+        const plusBtn = document.querySelector('.stepper button:last-child');
+        let quantity = 1;
+
+        minusBtn.addEventListener('click', () => {
+            if (quantity > 1) {
+                quantity--;
+                stepperSpan.textContent = quantity + (quantity === 1 ? ' Sleeve' : ' Sleeves');
+            }
+        });
+
+        plusBtn.addEventListener('click', () => {
+            quantity++;
+            stepperSpan.textContent = quantity + ' Sleeves';
+        });
+
+        // Carousel interactions
+        const pods = document.querySelectorAll('.pod-container');
+        pods.forEach((pod, index) => {
+            pod.addEventListener('click', () => {
+                if(pod.classList.contains('pos-2')) return;
+                
+                // Simple shift logic for demo
+                const currentCenter = document.querySelector('.pos-2');
+                const currentPos = pod.className.match(/pos-\d/)[0];
+                
+                pod.classList.remove(currentPos);
+                pod.classList.add('pos-2');
+                
+                currentCenter.classList.remove('pos-2');
+                currentCenter.classList.add(currentPos);
+            });
+        });
+
+        // Add to cart
+        const cartBtn = document.querySelector('.add-cart');
+        const cartCount = document.querySelector('.header-right');
+        let totalItems = 3;
+        cartBtn.addEventListener('click', () => {
+            totalItems += quantity;
+            cartCount.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg> CART (${totalItems})`;
+            
+            // Animation
+            cartBtn.style.transform = 'scale(0.95)';
+            setTimeout(() => cartBtn.style.transform = 'scale(1)', 150);
+        });
+    </script>
+</body>
+</html>
